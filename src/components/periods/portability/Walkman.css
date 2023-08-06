@@ -10,21 +10,34 @@
     transition: all 0.5s cubic-bezier(0.48, 0, 0.28, 0.99);
 }
 
+.walkman-wrapper {
+    padding: 40px 150px 150px 150px;
+    overflow: hidden;
+}
+
 /* Walkman 
 ------------------------ */
 .walkman {
     width: 336px;
     height: 520px;
-    margin: 200px;
+    /*margin-top: 28px;*/
     /*margin: auto;
     /*position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;*/
-    transition: all 1s;
+    /*transition: all .1s;*/
     transform-origin: 50%;
     transform: rotateY(var(--rotation-y)) rotateX(var(--rotation-x)) rotateZ(var(--rotation-z)) translateZ(-90px);
+}
+
+.walkman:hover {
+    cursor: grab;
+}
+
+.walkman:active {
+    cursor: grabbing;
 }
 
 /*.walkman.cover-open {
@@ -2035,11 +2048,27 @@
 }
 
 .tape.ejected {
-    transform: translate3d(341px, -270px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.8);
+    transform: translate3d(341px, -400px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.7);
+}
+
+.tape.tape-2.ejected {
+    transform: translate3d(341px, -180px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.7);
+}
+
+.tape.tape-3.ejected {
+    transform: translate3d(341px, 40px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.7);
 }
 
 .tape.ejected:hover {
-    transform: translate3d(341px, -270px, 0px) rotatey(10deg) rotatex(20deg) rotateZ(90deg) scale(0.85);
+    transform: translate3d(341px, -400px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.75);
+}
+
+.tape.tape-2.ejected:hover {
+    transform: translate3d(341px, -180px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.75);
+}
+
+.tape.tape-3.ejected:hover {
+    transform: translate3d(341px, 40px, 0px) rotatey(0deg) rotatex(0deg) rotateZ(90deg) scale(0.75);
 }
 
 .tape:before,
@@ -2079,8 +2108,20 @@
 }
 
 .tape .sides-z:before {
-    -webkit-mask-image: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/21555/tape-mask.svg);
+    mask-image: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/21555/tape-mask.svg);
     background: url(/cassette_1.png);
+    background-size: 100% 100%;
+    transform: translateZ(26px);
+}
+
+.tape.tape-2 .sides-z:before {
+    background: url(/cassette_2.png);
+    background-size: 100% 100%;
+    transform: translateZ(26px);
+}
+
+.tape.tape-3 .sides-z:before {
+    background: url(/cassette_3.png);
     background-size: 100% 100%;
     transform: translateZ(26px);
 }
@@ -2088,6 +2129,14 @@
 .tape .sides-z:after {
     height: 26px;
     background-color: rgb(66, 65, 76);
+}
+
+.tape-2:before,
+.tape-2:after,
+.tape-2 .sides-x:before,
+.tape-2 .sides-x:after,
+.tape-2 .sides-z:after {
+    background-color: rgb(236, 236, 236);
 }
 
 .reel-1 {
@@ -2257,8 +2306,8 @@
 }
 
 /* Anim- Tape playing */
-.tape-in.playing .reel-1,
-.tape-in.playing .reel-2 {
+.tape-in.playing .inserted .reel-1,
+.tape-in.playing .inserted .reel-2 {
     animation: reel-playing 2.5s linear infinite;
 }
 

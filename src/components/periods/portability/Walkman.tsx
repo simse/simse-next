@@ -1,15 +1,22 @@
 'use client'
 
-import { useState } from 'react';
-import ReactHowler from 'react-howler';
+import React, { useEffect, useState, useRef } from 'react';
+import useSound from '@/hooks/useSound';
+import usePrevious from '@/hooks/usePrevious';
 
 import './Walkman.css';
 
+const REWIND_FF_RATE = 20;
+
 const Walkman = () => {
-    const song = "/sounds/walkman/song_1.mp3";
+    const [playClickSfx] = useSound('/sounds/walkman/button_click_sfx_2.mp3');
 
     // Walkman state
     const [walkmanState, setWalkmanState] = useState<'playing' | 'stopped' | 'ff' | 'rewind' | 'ejecting' | 'ejected'>('stopped');
+    const previousWalkmanState = usePrevious(walkmanState);
+    const [timeStart, setTimeStart] = useState<Date>(new Date());
+    const songRef = useRef<HTMLAudioElement>(null);
+    const [selectedTape, setSelectedTape] = useState<number>(1);
 
     // state helpers
     const isPlaying = walkmanState === 'playing';
@@ -19,37 +26,141 @@ const Walkman = () => {
     const isEjecting = walkmanState === 'ejecting';
     const isEjected = walkmanState === 'ejected';
 
+
     // camera
-    const [rotationY, setRotationY] = useState<number>(-50);
-    const [rotationX, setRotationX] = useState<number>(0);
+    const [rotationY, setRotationY] = useState<number>(-35);
+    const [rotationX, setRotationX] = useState<number>(10);
     const [rotationZ, setRotationZ] = useState<number>(0);
 
     // UI state
-    const [ejectButtonPressed, setEjectButtonPressed] = useState<boolean>(true);
+    const [ejectButtonPressed, setEjectButtonPressed] = useState<boolean>(false);
 
     // UI logic
-
-
     const onPlayButtonClick = () => {
+        songRef.current?.play();
     }
+
+    const onStopButtonClick = () => {
+        songRef.current?.pause();
+    }
+
+    const adjustSongTime = (delta: number) => {
+        if (songRef.current) {
+            songRef.current.currentTime += delta;
+        }
+    }
+
+    useEffect(() => {
+        if (walkmanState === 'rewind' || walkmanState === 'ff') {
+            setTimeStart(new Date());
+
+            if (walkmanState === 'rewind') {
+                // calculate how much is left of tape, and set a timeout to stop rewinding
+                const secondsLeft = songRef.current?.currentTime || 0;
+
+                const timeout = setTimeout(() => {
+                    if (walkmanState === 'rewind') {
+                        setWalkmanState('stopped');
+                        /*console.log('stopping rewind')
+                        console.log(songRef.current)*/
+
+                        if (songRef.current) {
+                            songRef.current.currentTime = 0;
+                        }
+                    }
+                }, secondsLeft * 1000 / REWIND_FF_RATE);
+
+                return () => {
+                    // clears timeout before running the new effect
+                    clearTimeout(timeout);
+                };
+            }
+
+            if (walkmanState === 'ff') {
+                if (!songRef.current?.duration) return;
+
+                // calculate how much is left of tape, and set a timeout to stop rewinding
+                const secondsLeft = songRef.current?.duration - (songRef.current?.currentTime || 0);
+
+                const timeout = setTimeout(() => {
+                    if (walkmanState === 'ff') {
+                        setWalkmanState('stopped');
+                        /*console.log('stopping ff')
+                        console.log(songRef.current)*/
+
+                        if (songRef.current) {
+                            songRef.current.currentTime = songRef.current.duration;
+                        }
+                    }
+                }, secondsLeft * 1000 / REWIND_FF_RATE);
+
+                return () => {
+                    // clears timeout before running the new effect
+                    clearTimeout(timeout);
+                };
+            }
+        }
+
+        if (previousWalkmanState === 'rewind' || previousWalkmanState === 'ff') {
+            const secondsElapsed = (new Date().getTime() - timeStart.getTime()) / 1000 * REWIND_FF_RATE;
+
+            // console.log(secondsElapsed)
+
+            adjustSongTime(previousWalkmanState === 'rewind' ? -secondsElapsed : secondsElapsed);
+        }
+    }, [walkmanState]);
+
+    useEffect(() => {
+        if (isPlaying) {
+            onPlayButtonClick();
+        } else {
+            onStopButtonClick();
+        }
+    }, [isPlaying]);
+
+    // camera logic
+    const mouseDownX = useRef<number>(0);
+    const mouseDownY = useRef<number>(0);
+
+    const onMouseMove = (event: any) => {
+        //console.log(event);
+
+
+        const deltaX = event.clientX - mouseDownX.current;
+        const deltaY = event.clientY - mouseDownY.current;
+
+        //console.log(deltaX, deltaY)
+
+        setRotationY(rotationY + deltaX * 0.7);
+        setRotationX(rotationX - deltaY * 0.7);
+      };
+    
+      const onMouseUp = () => {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      };
+    
+      const onMouseDown = (event: React.MouseEvent) => {
+        event.preventDefault();
+
+        mouseDownX.current = event.clientX;
+        mouseDownY.current = event.clientY;
+
+        //console.log(event)
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      };
+
 
     return (
         <div className="walkman-wrapper">
-            <ReactHowler
-                src={`/sounds/tape_deck.mp3`}
-                playing={isPlaying || isFastForwarding || isRewinding}
-            />
-
-            <ReactHowler
-                src={song}
-                playing={isPlaying}
-                onEnd={() => setWalkmanState('stopped')}
-            />
-
-            <input type={`number`} value={rotationY} onChange={(e) => setRotationY(parseInt(e.target.value))} />
+            <audio ref={songRef} src={`/sounds/walkman/song_${selectedTape}.mp3`} loop={false} onEnded={() => setWalkmanState('stopped')} preload='auto' />
+            
             <div 
                 className={`walkman ${isEjecting || isEjected ? 'cover-open' : 'tape-in'} ${isPlaying ? 'playing' : ''} ${isFastForwarding ? 'forward' : ''} ${isRewinding ? 'rewind' : ''}`}
                 style={{ '--rotation-y': `${rotationY}deg`, '--rotation-x': `${rotationX}deg`, '--rotation-z': `${rotationZ}deg`} as React.CSSProperties}
+                onMouseDown={onMouseDown}
             >
                 <div className="cube walkman-top">
                     <div className="sides-x"></div>
@@ -216,7 +327,9 @@ const Walkman = () => {
 
                         <div className="play">
                             <div className={`cube play-button transition-03  ${isPlaying ? 'pressed' : ''}`} onMouseDown={() => {
+                                playClickSfx();
                                 setWalkmanState('playing');
+                                onPlayButtonClick();
                             }}>
                                 <div className="sides-x"></div>
                                 <div className="sides-z"></div>
@@ -226,6 +339,7 @@ const Walkman = () => {
 
                         <div className="rewind">
                             <div className={`cube rewind-button transition-03 ${isRewinding ? 'pressed' : ''}`} onMouseDown={() => {
+                                playClickSfx();
                                 setWalkmanState('rewind');
                             }}>
                                 <div className="sides-x"></div>
@@ -236,6 +350,7 @@ const Walkman = () => {
 
                         <div className="forward">
                             <div className={`cube forward-button transition-03 ${isFastForwarding ? 'pressed' : ''}`} onMouseDown={() => {
+                                playClickSfx();
                                 setWalkmanState('ff');
                             }}>
                                 <div className="sides-x"></div>
@@ -263,17 +378,22 @@ const Walkman = () => {
                             </ul>
                         </div>
                         <div className={`stop-eject`} onMouseDown={() => {
+                            playClickSfx();
+                            
                             setEjectButtonPressed(true);
                             setTimeout(() => {
                                 setEjectButtonPressed(false)
                             }, 200);
 
-                            if (walkmanState === 'ejected' || walkmanState === 'ejecting') return;
-                            
-                            if (walkmanState === 'stopped') {
+                            if (walkmanState === 'ejected') return;
+
+                            if (walkmanState === 'ejecting') {
+                                setWalkmanState('ejected');
+                            } else if (walkmanState === 'stopped') {
                                 setWalkmanState('ejecting')
                             } else {
                                 setWalkmanState('stopped');
+                                onStopButtonClick();
                             }
                         }} onMouseUp={() => {
                             
@@ -309,7 +429,8 @@ const Walkman = () => {
                     </div>
                 </div>
 
-                <div className={`tape cube transition-05 ${isEjected ? 'ejected' : ''}`} onMouseDown={() => {
+                {[1, 2, 3].map((i) => (<div className={`tape tape-${i} cube transition-05 ${isEjected || selectedTape !== i ? 'ejected' : 'inserted'} ${!isEjected && selectedTape !== i ? 'hidden' : ''}`} onMouseDown={() => {
+                    setSelectedTape(i);
                     if (isEjecting) {
                         setWalkmanState('ejected');
                     } else {
@@ -373,6 +494,7 @@ const Walkman = () => {
                         <div></div>
                     </div>
                 </div>
+            ))}
             </div>
         </div>
     )
