@@ -429,14 +429,18 @@ const Walkman = () => {
                     </div>
                 </div>
 
-                {[1, 2, 3].map((i) => (<div className={`tape tape-${i} cube transition-05 ${isEjected || selectedTape !== i ? 'ejected' : 'inserted'} ${!isEjected && selectedTape !== i ? 'hidden' : ''}`} onMouseDown={() => {
-                    setSelectedTape(i);
-                    if (isEjecting) {
-                        setWalkmanState('ejected');
-                    } else {
-                        setWalkmanState('ejecting');
-                    }
-                }}>
+                {[1, 2, 3].map((i) => (<div 
+                    className={`tape tape-${i} cube transition-05 ${isEjected || selectedTape !== i ? 'ejected' : 'inserted'} ${!isEjected && selectedTape !== i ? 'hidden' : ''}`}
+                    onMouseDown={() => {
+                        setSelectedTape(i);
+                        if (isEjecting) {
+                            setWalkmanState('ejected');
+                        } else {
+                            setWalkmanState('ejecting');
+                        }
+                    }}
+                    key={`tape-${i}`}
+                >
                     <div className="sides-x"></div>
                     <div className="sides-z"></div>
 
