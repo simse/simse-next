@@ -17,7 +17,9 @@ const Hero = () => {
                 <div className="px-16 pt-[300px] font-bold">
                     <h1 className="text-6xl ">The Age of</h1>
 
-                    <h1 className="text-[8rem] leading-[140px]">Portability</h1>
+                    <h1 className="text-[8rem] leading-[140px] mb-4">Portability</h1>
+
+                    <p className="text-2xl text-zinc-400">The Cassette Tape</p>
                 </div>
 
                 <div className="pt-32">

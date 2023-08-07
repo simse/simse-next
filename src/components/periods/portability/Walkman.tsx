@@ -37,6 +37,9 @@ const Walkman = () => {
 
     // UI logic
     const onPlayButtonClick = () => {
+        if (songRef.current) {
+            songRef.current.volume = 0.7;
+        }
         songRef.current?.play();
     }
 
