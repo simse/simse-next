@@ -32,39 +32,18 @@
     transform: rotateY(var(--rotation-y)) rotateX(var(--rotation-x)) rotateZ(var(--rotation-z)) translateZ(-90px);
 }
 
+@media screen and (max-width: 720px) {
+    .walkman {
+        transform: rotateY(var(--rotation-y)) rotateX(var(--rotation-x)) rotateZ(var(--rotation-z)) translateZ(100px) scale(0.8);
+    }
+}
+
 .walkman:hover {
     cursor: grab;
 }
 
 .walkman:active {
     cursor: grabbing;
-}
-
-/*.walkman.cover-open {
-    transform: rotateY(-14deg) rotateX(0deg) rotateZ(0) translateZ(-90px);
-}*/
-
-/* Walkman - Viewing angles 
------------------------- */
-.walkman.top-view {
-    transform: rotateY(-9deg) rotateX(-66deg) rotateZ(0) translateZ(-56px);
-    transform: rotateY(-9deg) rotateX(-66deg) rotateZ(0deg) translateZ(14px) translatey(-136px);
-}
-
-.walkman.bottom-view {
-    transform: rotateY(10deg) rotateX(87deg) rotateZ(0) translateZ(-60px);
-}
-
-.walkman.left-view {
-    transform: rotateY(68deg) rotateX(0deg) rotateZ(0) translateZ(-90px);
-}
-
-.walkman.right-view {
-    transform: rotateY(-78deg) rotateX(0deg) rotateZ(0) translateZ(-90px);
-}
-
-.walkman.back-view {
-    transform: rotateY(-208deg) rotateX(0deg) rotateZ(0) translateZ(-90px);
 }
 
 /* Walkman - Swivel animation

@@ -6,10 +6,13 @@ import usePrevious from '@/hooks/usePrevious';
 
 import './Walkman.css';
 
-const REWIND_FF_RATE = 20;
+const REWIND_FF_RATE = 30;
 
 const Walkman = () => {
     const [playClickSfx] = useSound('/sounds/walkman/button_click_sfx_2.mp3');
+    const [playRewindSfx, { stop: stopRewindSfx }] = useSound('/sounds/walkman/walkman_rewind.mp3');
+    const [playFastForwardSfx, { stop: stopFastForwardSfx }] = useSound('/sounds/walkman/walkman_ff.mp3');
+    const [playInsertSfx] = useSound('/sounds/walkman/walkman_tape_insert.mp3');
 
     // Walkman state
     const [walkmanState, setWalkmanState] = useState<'playing' | 'stopped' | 'ff' | 'rewind' | 'ejecting' | 'ejected'>('stopped');
@@ -112,6 +115,27 @@ const Walkman = () => {
             adjustSongTime(previousWalkmanState === 'rewind' ? -secondsElapsed : secondsElapsed);
         }
     }, [walkmanState]);
+
+    // sfx effect
+    useEffect(() => {
+        if (walkmanState === 'rewind') {
+            playRewindSfx();
+        } else {
+            stopRewindSfx();
+        }
+
+        if (walkmanState === 'ff') {
+            playFastForwardSfx();
+        } else {
+            stopFastForwardSfx();
+        }
+    }, [walkmanState]);
+
+    useEffect(() => {
+        if (walkmanState === 'ejecting') {
+            playInsertSfx();
+        }
+    }, [selectedTape]);
 
     useEffect(() => {
         if (isPlaying) {
