@@ -1,8 +1,24 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 
 const inter = Inter({ subsets: ['latin'] })
+
+const suisseIntlFont = localFont({
+  src: [
+    {
+      path: '../fonts/SuisseIntl-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/SuisseIntl-Bold.woff',
+      weight: '700',
+      style: 'normal',
+    }
+  ]
+})
 
 export const metadata: Metadata = {
   title: 'Simon Sorensen',
@@ -16,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-black text-white`}>{children}</body>
+      <body className={`${suisseIntlFont.className} bg-black text-white`}>{children}</body>
     </html>
   )
 }

@@ -158,8 +158,15 @@ const Walkman = () => {
 
         //console.log(deltaX, deltaY)
 
-        setRotationY(rotationY + deltaX * 0.7);
-        setRotationX(rotationX - deltaY * 0.7);
+        const newRotationY = rotationY + deltaX * 0.7;
+        if (newRotationY > -35 && newRotationY < 35) {
+            setRotationY(newRotationY);
+        }
+
+        const newRotationX = rotationX - deltaY * 0.7;
+        if (newRotationX > -20 && newRotationX < 20) {
+            setRotationX(newRotationX);
+        }
       };
     
       const onMouseUp = () => {
