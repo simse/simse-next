@@ -35,3 +35,5 @@ export async function generateStaticParams() {
     slug: post.slug,
   }))
 }
+
+export const runtime = 'edge';
