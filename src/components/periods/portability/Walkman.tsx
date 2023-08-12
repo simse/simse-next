@@ -7,12 +7,26 @@ import usePrevious from '@/hooks/usePrevious';
 import './Walkman.css';
 
 const REWIND_FF_RATE = 30;
+const MAX_ROTATION_Y = 35;
+const MIN_ROTATION_Y = -35;
+const MAX_ROTATION_X = 20;
+const MIN_ROTATION_X = -20;
+
+const limitWithResistance = (input: number, lowerLimit: number, upperLimit: number): number => {
+    if (input >= lowerLimit && input <= upperLimit) {
+        return input;
+    } else if (input < lowerLimit) {
+        return lowerLimit - Math.log(lowerLimit - input + 1) * 2;
+    } else {
+        return upperLimit + Math.log(input - upperLimit + 1) * 2;
+    }
+}
 
 const Walkman = () => {
-    const [playClickSfx] = useSound('/sounds/walkman/button_click_sfx_2.mp3');
-    const [playRewindSfx, { stop: stopRewindSfx }] = useSound('/sounds/walkman/walkman_rewind.mp3');
-    const [playFastForwardSfx, { stop: stopFastForwardSfx }] = useSound('/sounds/walkman/walkman_ff.mp3');
-    const [playInsertSfx] = useSound('/sounds/walkman/walkman_tape_insert.mp3');
+    const [playClickSfx] = useSound('/sounds/walkman/button_click_sfx_2.mp3', { interrupt: true });
+    const [playRewindSfx, { stop: stopRewindSfx }] = useSound('/sounds/walkman/walkman_rewind.mp3', { interrupt: true });
+    const [playFastForwardSfx, { stop: stopFastForwardSfx }] = useSound('/sounds/walkman/walkman_ff.mp3', { interrupt: true });
+    const [playInsertSfx] = useSound('/sounds/walkman/walkman_tape_insert.mp3', { interrupt: true });
 
     // Walkman state
     const [walkmanState, setWalkmanState] = useState<'playing' | 'stopped' | 'ff' | 'rewind' | 'ejecting' | 'ejected'>('stopped');
@@ -156,17 +170,12 @@ const Walkman = () => {
         const deltaX = event.clientX - mouseDownX.current;
         const deltaY = event.clientY - mouseDownY.current;
 
-        //console.log(deltaX, deltaY)
+        const newRotationY = rotationY + deltaX * 0.4;
+        setRotationY(limitWithResistance(newRotationY, MIN_ROTATION_Y, MAX_ROTATION_Y));
+        
 
-        const newRotationY = rotationY + deltaX * 0.7;
-        if (newRotationY > -35 && newRotationY < 35) {
-            setRotationY(newRotationY);
-        }
-
-        const newRotationX = rotationX - deltaY * 0.7;
-        if (newRotationX > -20 && newRotationX < 20) {
-            setRotationX(newRotationX);
-        }
+        const newRotationX = rotationX - deltaY * 0.4;
+        setRotationX(limitWithResistance(newRotationX, MIN_ROTATION_X, MAX_ROTATION_X));
       };
     
       const onMouseUp = () => {
@@ -189,7 +198,7 @@ const Walkman = () => {
 
     return (
         <div className="walkman-wrapper">
-            <audio ref={songRef} src={`/sounds/walkman/song_${selectedTape}.mp3`} loop={false} onEnded={() => setWalkmanState('stopped')} preload='auto' />
+            <audio ref={songRef} src={`https://files.simse.io/walkman/song_${selectedTape}.mp3`} loop={false} onEnded={() => setWalkmanState('stopped')} preload='auto' />
             
             <div 
                 className={`walkman ${isEjecting || isEjected ? 'cover-open' : 'tape-in'} ${isPlaying ? 'playing' : ''} ${isFastForwarding ? 'forward' : ''} ${isRewinding ? 'rewind' : ''}`}
